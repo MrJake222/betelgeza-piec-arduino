@@ -1,0 +1,38 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "compile",
+            "type": "shell",
+            "command": "arduino-cli compile -b esp8266:esp8266:generic",
+            "presentation": {"echo": true, "reveal": "always", "focus": false, "panel": "shared", "showReuseMessage": false, "clear": true},
+        },
+        {
+            "label": "upload",
+            "type": "shell",
+            "command": "arduino-cli upload -b esp8266:esp8266:generic:baud=921600 -p /dev/ttyUSB0",
+            "presentation": {"echo": true, "reveal": "always", "focus": false, "panel": "shared", "showReuseMessage": false, "clear": true},
+        },
+        {
+            "label": "compile & upload",
+            "type": "shell",
+            "command": "arduino-cli compile -b esp8266:esp8266:generic && arduino-cli upload -b esp8266:esp8266:generic:baud=921600 -p /dev/ttyUSB0",
+            "presentation": {"echo": true, "reveal": "always", "focus": false, "panel": "shared", "showReuseMessage": false, "clear": true},
+        },
+        {
+            "label": "monitor",
+            "type": "shell",
+            "command": "arduino-cli monitor -p /dev/ttyUSB0 -c baudrate=115200",
+            "presentation": {"echo": true, "reveal": "always", "focus": false, "panel": "shared", "showReuseMessage": false, "clear": true},
+        },
+    ],
+    "typescript.tsc.autoDetect": "off",
+    "grunt.autoDetect": "off",
+    "jake.autoDetect": "off",
+    "gulp.autoDetect": "off",
+    "npm.autoDetect": "off",
+    "clang.autoDetect": "off",
+    "gpp.autoDetect": "off",
+    "cpp.autoDetect": "off",
+    "clangpp.autoDetect": "off",
+}

@@ -1,0 +1,86 @@
+#statuses {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+#statuses>* {
+    margin: 0 10px;
+}
+
+@media only screen and (max-width: 600px) {
+    #statuses {
+        flex-direction: column;
+    }
+
+    #statuses>* {
+        margin: 10px 0;
+    }
+}
+
+.status {
+    border: 1px solid black;
+    width: fit-content;
+    padding: 2px 20px;
+}
+
+.status span {
+    margin-top: 4px;
+    margin-left: 14px;
+}
+
+.good {
+    background-color: rgba(0, 128, 0, 0.281);
+}
+
+.bad {
+    background-color: rgba(128, 0, 0, 0.281);
+}
+
+.htemp_title {
+    padding: 20px 20px;
+}
+
+.htemp {
+    display: flex;
+    flex-direction: row;
+}
+
+.temp_title {
+    font-size: 24px;
+    margin: 0;
+    padding-bottom: 4px;
+}
+
+.temp {
+    display: flex;
+    margin: 0px 20px;
+}
+
+.bigtemp {
+    font-size: 72px;
+}
+
+.deginfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.deg {
+    font-size: 20px;
+    
+    position: relative;
+    top: 12px;
+    height: 30px;
+}
+
+.info {
+    display: flex;
+    align-items: flex-end;
+
+    position: relative;
+    bottom: 12px;
+
+    padding-left: 8px;
+    font-size: 18px;
+}

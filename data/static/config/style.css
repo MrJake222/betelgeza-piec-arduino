@@ -1,0 +1,112 @@
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+th {
+    padding: 2px 8px;
+}
+
+header {
+	font-weight: bold;
+	font-size: 20px;
+	margin-bottom: 6px;
+}
+
+form, .form-like {
+	padding: 12px 10px;
+	margin-bottom: 40px;
+}
+
+article {
+    margin-left: 7px;
+}
+
+@keyframes loading_anim {
+	0%   {opacity: 0%;}
+	100% {opacity: 100%;}
+}
+
+.loading {
+	color: blue;
+	/* font-size: 20px; */
+	/* padding: 20px 0; */
+
+	animation-name: loading_anim;
+	animation-duration: 1s;
+	animation-iteration-count: infinite;
+	animation-direction: alternate;
+	animation-timing-function: ease-in-out;
+
+	/* display: none; */
+	/* display: inline; */
+}
+
+.password {
+    margin: 11px 0;
+}
+
+
+
+.ssid, .bssid, .enc {
+    padding-right: 20px;
+    padding-left: 4px;
+}
+
+.channel, .rssi {
+    text-align: right;
+	padding-right: 4px;
+    padding-left: 20px;
+}
+
+.enc {
+	text-transform: uppercase;
+}
+
+.hidden {
+    font-style: italic;
+	text-align: center;
+}
+
+.connected {
+	color: #267126;
+	background: #dfdfdf;
+}
+
+input[type=submit] {
+	width: 160px;
+	height: 34px;
+	margin-top: 12px;
+}
+
+.status {
+	display: flex;
+	padding: 12px 1px;
+}
+
+.status span {
+	margin-right: 9px;
+}
+
+#sta-config {
+	display: none;
+}
+
+#wifi-networks {
+	margin-top: 20px;
+}
+
+h3 {
+	margin-top: 30px;
+	margin-bottom: 6px;
+}
+
+button {
+	display: block;
+}
+
+.warning {
+	display: block;
+	color: rgb(129, 129, 0);
+	padding-top: 5px;
+}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ESP 8266</title>
+    <link rel="stylesheet" href="config/style.css">
+
+    <script src="config/scan.js"></script>
+    <script src="config/mode.js"></script>
+    <script>
+        window.onload = () => {
+            load_mode()
+            document.getElementById("load_aps").onclick = (e) => {
+                e.preventDefault()
+                load_networks()
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h1>ESP config page</h1>
+    <form action="/wifi_ap_config" method="POST">
+        <header>Access Point</header>
+        <article>
+            <div class="status">
+                <span>AP status:</span>
+                <div id="loading_mode_ap" class="loading_mode loading">Loading...</div>
+            </div>
+
+            <input type='radio' name='ap' value='on' id="radio_ap_on" /> ON
+            <input type='radio' name='ap' value='off' id="radio_ap_off" /> OFF<br/>
+            <input type='submit' value='Apply AP settings'/>
+        </article>
+    </form>
+
+    <form action="/wifi_sta_config" method="POST">
+        <header>Station</header>
+        <article>
+            <div class="status">
+                <span>STA status:</span>
+                <div id="loading_mode_sta" class="loading_mode loading">Loading...</div>
+            </div>
+
+            <input type='radio' name='sta' value='on' id="radio_sta_on" /> ON
+            <input type='radio' name='sta' value='off' id="radio_sta_off" /> OFF<br/>
+
+            <h3>APs</h3>
+            <button id="load_aps">Load available APs</button>
+            <span class="warning">Warning, loading APs will disconnect you from current AP.</span>
+            <section id="sta-config">
+                <table id="wifi-networks">
+                    <tr>
+                        <th></th>
+                        <th>SSID</th>
+                        <th>BSSID</th>
+                        
+                        <th>Encryption</th>
+                        <th>Channel</th>
+                        <th>RSSI</th>
+                        <th>Hidden?</th>
+                    </tr>
+                </table>
+                <div id="loading-sta" class="loading">Loading...</div>
+
+                <div class="password">
+                    Password: <input type='password' name='pass'/><br/>
+                </div>
+            </section>
+
+            <input type='submit' value='Apply STA settings'/>
+        </article>
+    </form>
+
+    <div class="form-like">
+        <header>Features</header>
+        <article>
+            <a href="/">Monitorowanie pieca</a>
+        </article>
+    </div>
+</body>
+</html>

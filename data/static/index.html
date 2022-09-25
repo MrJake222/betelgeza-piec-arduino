@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piec</title>
+
+    <link rel="stylesheet" href="piec/style.css">
+
+    <script src="piec/status.js" defer></script>
+    <script src="piec/temp.js" defer></script>
+    <script src="piec/updater.js" defer></script>
+    <script>
+        window.onload = () => {
+            setInterval(update, 5000)
+            update()
+        }
+    </script>
+</head>
+
+<body>
+    <section id="statuses">
+        <div class="status">Status ramki: <br><span id="last_status">Ładowanie...</span></div>
+        <div class="status">Ostatnia prawidłowa ramka: <br><span id="last_good_frame">Ładowanie...</span></div>
+        <a href="config.html">Konfiguracja ESP</a>
+    </section>
+
+    <section class="htemp_title">
+        <p class="temp_title">Kocioł CO</p>
+        <section class="htemp">        
+            <article class="temp">
+                <div class="bigtemp" id="co_aktualna">70</div>
+                <div class="deginfo">
+                    <div class="deg">°C</div>
+                    <div class="info">Aktualna</div>
+                </div>
+            </article>
+
+            <article class="temp">
+                <div class="bigtemp" id="co_zadana">70</div>
+                <div class="deginfo">
+                    <div class="deg">°C</div>
+                    <div class="info">Zadana</div>
+                </div>
+            </article>
+        </section>
+    </section>
+
+    <section class="htemp_title">
+        <p class="temp_title">Woda użytkowa</p>
+        <section class="htemp">        
+            <article class="temp">
+                <div class="bigtemp" id="cwu_aktualna">70</div>
+                <div class="deginfo">
+                    <div class="deg">°C</div>
+                    <div class="info">Aktualna</div>
+                </div>
+            </article>
+
+            <article class="temp">
+                <div class="bigtemp" id="cwu_zadana">70</div>
+                <div class="deginfo">
+                    <div class="deg">°C</div>
+                    <div class="info">Zadana</div>
+                </div>
+            </article>
+        </section>
+    </section>
+</body>
+</html>
