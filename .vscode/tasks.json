@@ -4,19 +4,19 @@
         {
             "label": "compile",
             "type": "shell",
-            "command": "arduino-cli compile -b esp8266:esp8266:generic",
+            "command": "arduino-cli compile -b esp8266:esp8266:generic:eesz=4M2M",
             "presentation": {"echo": true, "reveal": "always", "focus": false, "panel": "shared", "showReuseMessage": false, "clear": true},
         },
         {
             "label": "upload",
             "type": "shell",
-            "command": "arduino-cli upload -b esp8266:esp8266:generic:baud=921600 -p /dev/ttyUSB0",
+            "command": "arduino-cli upload -b esp8266:esp8266:generic:baud=921600,eesz=4M2M -p /dev/ttyUSB0",
             "presentation": {"echo": true, "reveal": "always", "focus": false, "panel": "shared", "showReuseMessage": false, "clear": true},
         },
         {
             "label": "compile & upload",
             "type": "shell",
-            "command": "arduino-cli compile -b esp8266:esp8266:generic && arduino-cli upload -b esp8266:esp8266:generic:baud=921600 -p /dev/ttyUSB0",
+            "command": "arduino-cli compile -b esp8266:esp8266:generic:eesz=4M2M && arduino-cli upload -b esp8266:esp8266:generic:baud=921600,eesz=4M2M -p /dev/ttyUSB0",
             "presentation": {"echo": true, "reveal": "always", "focus": false, "panel": "shared", "showReuseMessage": false, "clear": true},
         },
         {

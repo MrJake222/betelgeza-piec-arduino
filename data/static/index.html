@@ -7,11 +7,22 @@
 
     <link rel="stylesheet" href="piec/style.css">
 
+    <script src="piec/updater.js" defer></script>
     <script src="piec/status.js" defer></script>
     <script src="piec/temp.js" defer></script>
-    <script src="piec/updater.js" defer></script>
+    <script src="piec/maps.js" defer></script>
+    <script src="piec/circulation.js" defer></script>
     <script>
+        
+
         window.onload = () => {
+            update_list = [
+                status_update,
+                temp_update,
+                maps_update,
+                circulation_update
+            ]
+
             setInterval(update, 5000)
             update()
         }
@@ -19,52 +30,137 @@
 </head>
 
 <body>
-    <section id="statuses">
-        <div class="status">Status ramki: <br><span id="last_status">Ładowanie...</span></div>
-        <div class="status">Ostatnia prawidłowa ramka: <br><span id="last_good_frame">Ładowanie...</span></div>
-        <a href="config.html">Konfiguracja ESP</a>
-    </section>
-
-    <section class="htemp_title">
-        <p class="temp_title">Kocioł CO</p>
-        <section class="htemp">        
-            <article class="temp">
-                <div class="bigtemp" id="co_aktualna">70</div>
-                <div class="deginfo">
-                    <div class="deg">°C</div>
-                    <div class="info">Aktualna</div>
-                </div>
-            </article>
-
-            <article class="temp">
-                <div class="bigtemp" id="co_zadana">70</div>
-                <div class="deginfo">
-                    <div class="deg">°C</div>
-                    <div class="info">Zadana</div>
-                </div>
-            </article>
+    <section class="section">
+        <p class="title">Status modułu internetowego</p>
+        <section class="statuses">
+            <div class="status">Status ramki: <br>
+                <span id="last_status">Ładowanie...</span><br>
+                <span id="frame_stats" class="badtext">Ładowanie...</span>
+            </div>
+            <div class="status">Ostatnia prawidłowa ramka: <br><span id="last_good_frame">Ładowanie...</span></div>
+            <a href="config.html">Konfiguracja ESP</a>
         </section>
     </section>
 
-    <section class="htemp_title">
-        <p class="temp_title">Woda użytkowa</p>
-        <section class="htemp">        
-            <article class="temp">
-                <div class="bigtemp" id="cwu_aktualna">70</div>
-                <div class="deginfo">
-                    <div class="deg">°C</div>
-                    <div class="info">Aktualna</div>
-                </div>
-            </article>
+    <section class="section">
+        <p class="title">Temperatury</p>
+        <section class="temp_wrapper">
+            <p class="temp_title">Kocioł CO</p>
+            <section class="htemp">        
+                <article class="temp">
+                    <div class="bigtemp" id="co_current">--</div>
+                    <div class="deginfo">
+                        <div class="deg">°C</div>
+                        <div class="info">Aktualna</div>
+                    </div>
+                </article>
 
-            <article class="temp">
-                <div class="bigtemp" id="cwu_zadana">70</div>
-                <div class="deginfo">
-                    <div class="deg">°C</div>
-                    <div class="info">Zadana</div>
-                </div>
-            </article>
+                <article class="temp gray">
+                    <div class="bigtemp" id="co_target">--</div>
+                    <div class="deginfo">
+                        <div class="deg">°C</div>
+                        <div class="info">Zadana</div>
+                    </div>
+                </article>
+            </section>
         </section>
+
+        <section class="temp_wrapper">
+            <p class="temp_title">Woda użytkowa</p>
+            <section class="htemp">        
+                <article class="temp">
+                    <div class="bigtemp" id="cwu_current">--</div>
+                    <div class="deginfo">
+                        <div class="deg">°C</div>
+                        <div class="info">Aktualna</div>
+                    </div>
+                </article>
+
+                <article class="temp gray">
+                    <div class="bigtemp" id="cwu_target">--</div>
+                    <div class="deginfo">
+                        <div class="deg">°C</div>
+                        <div class="info">Zadana</div>
+                    </div>
+                </article>
+            </section>
+        </section>
+
+        <section class="temp_wrapper">
+            <p class="temp_title">Zawór podłogowy</p>
+            <section class="htemp">        
+                <article class="temp">
+                    <div class="bigtemp" id="valve_current">--</div>
+                    <div class="deginfo">
+                        <div class="deg">°C</div>
+                        <div class="info">Aktualna</div>
+                    </div>
+                </article>
+
+                <article class="temp gray">
+                    <div class="bigtemp" id="valve_target">--</div>
+                    <div class="deginfo">
+                        <div class="deg">°C</div>
+                        <div class="info">Zadana</div>
+                    </div>
+                </article>
+            </section>
+        </section>
+    </section>
+
+    <section class="section">
+        <p class="title">Stan kotła</p>
+        <section class="statuses">
+            <div class="status">Stan sterownika:<br>
+                <span id="control_unit_mode">Ładowanie...</div>
+            </div>
+            <div class="status">Tryb pracy pomp:<br>
+                <span id="pumps_mode">Ładowanie...</div>
+            </div>
+            <div class="status">Pompa cyrkulacyjna:<br>
+                <span id="circulation_pump">Ładowanie...</div>
+            </div>
+        </section>
+    </section>
+
+    <section class="section">
+        <p class="title">Pompa cyrkulacyjna</p>
+        <form id="pump_form" action="/pump_set_time" method="POST">
+            <div>
+                <span>Włącz pompę cyrkulacyjną na: </span>
+                <input type="number" name="force_time" value="15" />
+                minut
+            </div>
+            <input type="submit" value="OK" />
+        </form>
+    </section>
+
+    <section class="section">
+        <p class="title">Nastawy</p>
+        <form id="setting_form" action="/proto_set_params" method="POST">
+
+            <div>
+                <span>Zadana temperatura CO:</span>
+                <input type="number" id="co_set" name="co_target"/>
+            </div>
+
+            <div>
+                <span>Zadana temperatura CWU:</span>
+                <input type="number" id="cwu_set" name="cwu_target" />
+            </div>
+
+            <div>
+                <span>Zadana temperatura zaworu:</span>
+                <input type="number" id="valve_set" name="valve_target" />
+            </div>
+
+            <div>
+                <span>Tryb pracy pomp:</span>
+                <select id="pumps_modes" name="pumps_mode"></select>
+            </div>
+
+            <input type="submit" value="Potwierdź" />
+        </form>
     </section>
 </body>
 </html>

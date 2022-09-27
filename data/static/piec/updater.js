@@ -1,18 +1,13 @@
-let update_list = [
-    status_update,
-    temp_update
-]
-
 async function update() {
 
     try {
-        let resp = await fetch("/proto_list_params")
+        let resp = await fetch("/proto_get_params")
         if (!resp.ok) {
             throw Error("response mode not ok, error: " + resp.statusText)
         }
 
         let json = await resp.json()
-        console.debug("Params: ", json)
+        // console.debug("Params: ", json)
 
         update_list.forEach(e => e(json))
     }

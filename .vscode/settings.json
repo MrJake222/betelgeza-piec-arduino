@@ -30,6 +30,13 @@
         "utility": "cpp",
         "__debug": "cpp",
         "memory": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "deque": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "initializer_list": "cpp",
+        "valarray": "cpp",
+        "compare": "cpp",
+        "iomanip": "cpp"
     }
 }

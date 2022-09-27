@@ -1,6 +1,7 @@
 #include "server.hpp"
 
-#include "LittleFS.h"
+#include <LittleFS.h>
+#include "helpers.hpp"
 
 namespace mrjake {
 
@@ -41,6 +42,10 @@ void Server::start() {
     _esp_server.on("/wifi_sta_config", HTTP_POST, std::bind(&mrjake::Server::_handle_wifi_sta_config, this));
 
     _esp_server.on("/proto_list_params", HTTP_GET, std::bind(&mrjake::Server::_handle_proto_list_params, this));
+    _esp_server.on("/proto_get_params", HTTP_GET, std::bind(&mrjake::Server::_handle_proto_get_params, this));
+    _esp_server.on("/proto_set_params", HTTP_POST, std::bind(&mrjake::Server::_handle_proto_set_params, this));
+    
+    _esp_server.on("/pump_set_time", HTTP_POST, std::bind(&mrjake::Server::_handle_pump_set_time, this));
 
     _esp_server.serveStatic("/", LittleFS, "/static/");
 
@@ -59,7 +64,7 @@ void Server::loop() {
         wl_status_t status;
         if ((status = WiFi.status()) == WL_DISCONNECTED) {
             _led_state ^= 1;
-            digitalWrite(2, _led_state);
+            digitalWrite(P_STATUS_LED, _led_state);
 
             Serial.print(".");
         }
@@ -72,22 +77,40 @@ void Server::loop() {
 
             if (WiFi.isConnected()) {
                 // OK -> LED turned off
-                digitalWrite(2, HIGH);
+                digitalWrite(P_STATUS_LED, HIGH);
             } else {
                 // not OK -> solid light
-                digitalWrite(2, LOW);
+                digitalWrite(P_STATUS_LED, LOW);
             }
 
             _should_check_status = false;
+            _config_changed();
         }
 
         _last_check_millis = millis();
+    }
+
+    if (_should_track_pump && ((millis() - _pump_start) >= _pump_time_to_run)) {
+        digitalWrite(P_PUMP, LOW);
+
+        Serial.println("pump OFF");
+        _should_track_pump = false;
     }
 }
 
 void Server::_serialize_and_send_json() {
     size_t contentLength = serializeJson(_json_doc, _buf, _BUF_SIZE);
     _esp_server.send(200, "application/json", _buf, contentLength);
+}
+
+void Server::_redirect(String url) {
+    _esp_server.sendHeader("Location", url);
+    _esp_server.send(301, "text/plain", "Redirection in progress...");
+}
+
+void Server::_config_changed() {
+    restart();
+    _config_changed_callback();
 }
 
 /**
@@ -141,6 +164,8 @@ void Server::_handle_wifi_scan() {
 void Server::_handle_wifi_mode() {
 
     _json_doc.clear();
+    bool ap = false;
+    bool sta = false;
 
     // WIFI_OFF = 0, WIFI_STA = 1, WIFI_AP = 2, WIFI_AP_STA = 3
     switch (WiFi.getMode()) {
@@ -150,24 +175,33 @@ void Server::_handle_wifi_mode() {
 
         case WIFI_STA:
             _json_doc["mode"] = "sta";
+            sta = true;
             break;
 
         case WIFI_AP:
             _json_doc["mode"] = "ap";
+            ap = true;
             break;
 
         case WIFI_AP_STA:
             _json_doc["mode"] = "ap_sta";
+            ap = true;
+            sta = true;
             break;
         
         default:
             _json_doc["mode"] = "unknown";
     }
 
-    _json_doc["ap_ssid"] = WiFi.softAPSSID();
-    _json_doc["ap_ip"] = WiFi.softAPIP().toString();
-    _json_doc["sta_status_string"] = wifi_sta_status_to_string(_last_error != -1 ? _last_error : WiFi.status());
-    _json_doc["sta_ip"] = WiFi.localIP().toString();
+    if (ap) {
+        _json_doc["ap_ssid"] = WiFi.softAPSSID();
+        _json_doc["ap_ip"] = WiFi.softAPIP().toString();
+    }
+
+    if (sta) {
+        _json_doc["sta_status_string"] = wifi_sta_status_to_string(_last_error != -1 ? _last_error : WiFi.status());
+        _json_doc["sta_ip"] = WiFi.localIP().toString();
+    }
 
     _serialize_and_send_json();
 }
@@ -177,16 +211,18 @@ void Server::_handle_wifi_ap_config() {
 
     if (ap == "on") {
         Serial.println("turning on AP mode");
-        _esp_server.send(200, "text/html", "<h1>AP turned ON</h1><a href='/'>Back.</a>");
+        _redirect("/status/ap_on.html");
 
         WiFi.persistent(true);
         WiFi.softAP("ESP8266");
     } else {
         Serial.println("turning off AP mode");
-        _esp_server.send(200, "text/html", "<h1>AP turned OFF</h1><a href='/'>Back.</a>");
+        _redirect("/status/ap_off.html");
 
         WiFi.softAPdisconnect(true);
     }
+
+    _config_changed();
 }
 
 void Server::_handle_wifi_sta_config() {
@@ -194,13 +230,13 @@ void Server::_handle_wifi_sta_config() {
 
     if (sta == "off") {
         Serial.println("turning off STA mode");
-        _esp_server.send(200, "text/html", "<h1>STA mode turned OFF</h1><a href='/'>Back.</a>");
+        _redirect("status/sta_off.html");
         WiFi.disconnect(true);
     }
 
     else {
         if (!_esp_server.hasArg("ssid")) {
-            _esp_server.send(400, "text/html", "No SSID given, no action performed");
+            _redirect("status/sta_e_ssid.html");
             return;
         }
 
@@ -208,8 +244,7 @@ void Server::_handle_wifi_sta_config() {
         String pass = _esp_server.arg("pass");
 
         Serial.println("turning on STA mode");
-        _esp_server.sendHeader("Location", "/sta_activating.html");
-        _esp_server.send(301, "text/plain", "Redirection in progress...");
+        _redirect("/status/sta_on.html");
 
         Serial.println("Trying:");
         Serial.println("  SSID: " + ssid);
@@ -221,34 +256,119 @@ void Server::_handle_wifi_sta_config() {
         
         Serial.println("waiting for STA connection");
 
-        pinMode(2, OUTPUT);
-        // Low turns on
-
         _should_check_status = true;
         _last_check_millis = millis();
 
-        digitalWrite(2, LOW);
+        digitalWrite(P_STATUS_LED, LOW);
         _led_state = 0;
     }
 }
 
-// Returns parameters as hex strings with numerical (decimal) values
+// Returns parameters as hex strings as numerical (decimal) values
 void Server::_handle_proto_list_params() {
 
     _json_doc.clear();
 
     _json_doc["last_status"] = _decoder.get_last_status();
     _json_doc["last_good_frame"] = _decoder.get_last_good_frame_received();
+    _json_doc["good_frames"] = _decoder.get_ok_frames();
+    _json_doc["wrong_frames"] = _decoder.get_wrong_frames();
 
-    Serial.println("Reading parameters");
+    // Serial.println("Reading parameters to web");
 
     for (const auto entry : _decoder) {
-        Serial.printf("  param %04X is %04X\n", entry.first, entry.second);
+        // Serial.printf("  param %04X is %04X\n", entry.first, entry.second);
         
         _json_doc[String(entry.first, 16)] = entry.second;
     }
 
     _serialize_and_send_json();
+}
+
+// Returns parameters with descriptions as numerical (decimal) values
+void Server::_handle_proto_get_params() {
+
+    _json_doc.clear();
+
+    // Module state
+    _json_doc["last_status"] = _decoder.get_last_status();
+    _json_doc["last_good_frame"] = _decoder.get_last_good_frame_received();
+    _json_doc["good_frames"] = _decoder.get_ok_frames();
+    _json_doc["wrong_frames"] = _decoder.get_wrong_frames();
+
+    // Heating unit state
+    if (_decoder.has_param(F_TIME_r))
+        _json_doc["time"] = tech_time_to_string(_decoder.get_param(F_TIME_r));
+    if (_decoder.has_param(F_WDAY_r))
+        _json_doc["wday"] = _decoder.get_param(F_WDAY_r);
+
+    if (_decoder.has_param(F_CO_CURRENT_r))
+        _json_doc["co_current"] = (float)(_decoder.get_param(F_CO_CURRENT_r)) / 10;
+    if (_decoder.has_param(F_CO_TARGET_r))
+        _json_doc["co_target"] = _decoder.get_param(F_CO_TARGET_r);
+    if (_decoder.has_param(F_CO_RANGE_r)) {
+        _json_doc["co_min"] = _decoder.get_param(F_CO_RANGE_r) & 0xFF;
+        _json_doc["co_max"] = _decoder.get_param(F_CO_RANGE_r) >> 8;
+    }
+
+    if (_decoder.has_param(F_CWU_CURRENT_r))
+        _json_doc["cwu_current"] = (float)(_decoder.get_param(F_CWU_CURRENT_r)) / 10;
+    if (_decoder.has_param(F_CWU_TARGET_r))
+        _json_doc["cwu_target"] = _decoder.get_param(F_CWU_TARGET_r);
+    if (_decoder.has_param(F_CWU_RANGE_r)) {
+        _json_doc["cwu_min"] = _decoder.get_param(F_CWU_RANGE_r) & 0xFF;
+        _json_doc["cwu_max"] = _decoder.get_param(F_CWU_RANGE_r) >> 8;
+    }
+
+    if (_decoder.has_param(F_VALVE_CURRENT_r))
+        _json_doc["valve_current"] = (float)(_decoder.get_param(F_VALVE_CURRENT_r)) / 10;
+    if (_decoder.has_param(F_VALVE_TARGET_r))
+        _json_doc["valve_target"] =  _decoder.get_param(F_VALVE_TARGET_r);
+    if (_decoder.has_param(F_VALVE_RANGE_r)) {
+        _json_doc["valve_min"] = _decoder.get_param(F_VALVE_RANGE_r) & 0xFF;
+        _json_doc["valve_max"] = _decoder.get_param(F_VALVE_RANGE_r) >> 8;
+    }
+
+    if (_decoder.has_param(F_PUMPS_MODE_r))
+        _json_doc["pumps_mode"] = _decoder.get_param(F_PUMPS_MODE_r);
+    if (_decoder.has_param(F_CU_STATE_r))
+        _json_doc["cu_state"] = _decoder.get_param(F_CU_STATE_r);
+
+    if (_should_track_pump)
+        _json_doc["circulation_pump_time_left"] = (_pump_time_to_run + _pump_start - millis()) / 1000;
+
+    _serialize_and_send_json();
+}
+
+void Server::_handle_proto_set_params() {
+    if (_esp_server.hasArg("co_target"))
+        _decoder.schedule_for_send(F_CO_TARGET_W, _esp_server.arg("co_target").toInt());
+
+    if (_esp_server.hasArg("cwu_target"))
+        _decoder.schedule_for_send(F_CWU_TARGET_W, _esp_server.arg("cwu_target").toInt());
+
+    if (_esp_server.hasArg("pumps_mode"))
+        _decoder.schedule_for_send(F_PUMPS_MODE_W, _esp_server.arg("pumps_mode").toInt());
+
+    if (_esp_server.hasArg("valve_target"))
+        _decoder.schedule_for_send(F_VALVE_TARGET_W, _esp_server.arg("valve_target").toInt());
+
+    _redirect("/status/param_set.html");
+}
+
+void Server::_handle_pump_set_time() {
+
+    digitalWrite(P_PUMP, HIGH);
+
+    _pump_start = millis();
+    
+    int min = _esp_server.arg("force_time").toInt();
+    _pump_time_to_run = min*60*1000;
+    _should_track_pump = true;
+
+    Serial.printf("pump ON for %d minutes (%u millis)\n", min, _pump_time_to_run);
+
+    _redirect("/status/param_set.html");
 }
 
 } // end namespace

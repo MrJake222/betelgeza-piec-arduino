@@ -1,19 +1,24 @@
-#statuses {
+.statuses {
     display: flex;
     margin-bottom: 20px;
 }
 
-#statuses>* {
-    margin: 0 10px;
+.statuses>* {
+    margin: 0 5px;
 }
 
-@media only screen and (max-width: 600px) {
-    #statuses {
+.statuses>*:first-child {
+    margin-left: 0;
+    margin-top: 0;
+}
+
+@media only screen and (max-width: 672px) {
+    .statuses {
         flex-direction: column;
     }
 
-    #statuses>* {
-        margin: 10px 0;
+    .statuses>* {
+        margin: 5px 0;
     }
 }
 
@@ -21,6 +26,12 @@
     border: 1px solid black;
     width: fit-content;
     padding: 2px 20px;
+}
+
+@media only screen and (max-width: 672px) {
+    .status {
+        width: 260px;
+    }
 }
 
 .status span {
@@ -36,8 +47,47 @@
     background-color: rgba(128, 0, 0, 0.281);
 }
 
-.htemp_title {
-    padding: 20px 20px;
+.badtext {
+    color: rgba(128, 0, 0, 1);
+}
+
+.gray {
+    color: #535353
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    margin-bottom: 4px;
+}
+
+.section {
+    margin-top: 40px;
+}
+
+.section:first-of-type {
+    margin-top: 0;
+}
+
+.section>* {
+    margin-left: 10px;
+}
+
+.section .title {
+    margin-left: 0;
+}
+
+.temp_wrapper {
+    padding: 20px 0;
+}
+
+.temp_wrapper:first-of-type {
+    padding-top: 0;
+}
+
+.temp_wrapper:last-of-type {
+    padding-bottom: 0;
 }
 
 .htemp {
@@ -46,7 +96,7 @@
 }
 
 .temp_title {
-    font-size: 24px;
+    font-size: 22px;
     margin: 0;
     padding-bottom: 4px;
 }
@@ -54,6 +104,10 @@
 .temp {
     display: flex;
     margin: 0px 20px;
+}
+
+.temp:first-of-type {
+    margin-left: 14px;
 }
 
 .bigtemp {
@@ -83,4 +137,55 @@
 
     padding-left: 8px;
     font-size: 18px;
+}
+
+#setting_form {
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    margin-top: 6px;
+}
+
+#setting_form>* {
+    margin: 5px 10px;
+    display: flex;
+}
+
+#setting_form span {
+    display: block;
+    width: 220px;
+    
+    text-align: right;
+    padding-right: 8px;
+}
+
+#setting_form input {
+    width: 150px;
+}
+
+#setting_form select {
+    width: 158px;
+}
+
+#setting_form input[type="submit"] {
+    margin: 20px 0;
+    align-self: center;
+}
+
+#pump_form {
+    margin: 0 20px;
+    display: flex;
+}
+
+#pump_form input {
+    width: 50px;
+}
+
+#pump_form input[type="submit"] {
+    margin-left: 8px;
+}
+
+#pump_form div {
+    text-align: right;
+    padding-right: 15px;
 }
