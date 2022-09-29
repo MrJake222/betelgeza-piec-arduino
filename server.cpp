@@ -337,6 +337,8 @@ void Server::_handle_proto_get_params() {
     if (_should_track_pump)
         _json_doc["circulation_pump_time_left"] = (_pump_time_to_run + _pump_start - millis()) / 1000;
 
+    _json_doc["aux_in"] = !digitalRead(P_IN);
+
     _serialize_and_send_json();
 }
 
@@ -368,7 +370,7 @@ void Server::_handle_pump_set_time() {
 
     Serial.printf("pump ON for %d minutes (%u millis)\n", min, _pump_time_to_run);
 
-    _redirect("/status/param_set.html");
+    _redirect("/status/pump_on.html");
 }
 
 } // end namespace

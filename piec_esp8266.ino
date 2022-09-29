@@ -104,6 +104,9 @@ void setup() {
     pinMode(P_PUMP, OUTPUT);
     digitalWrite(P_PUMP, LOW);
 
+    // Input (inverted)
+    pinMode(P_IN, INPUT);
+
     WiFi.begin();
 
     for (int i=0; i<20 && !WiFi.isConnected(); i++) {

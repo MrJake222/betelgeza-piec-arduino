@@ -5,12 +5,12 @@
 const int P_STATUS_LED = 2;
 // Circulation pump
 const int P_PUMP = 5;
+// Aux input (inverted)
+const int P_IN = 4;
 
 // Soft UART config
-// Rx -- GPIO 12
-// Tx -- GPIO 14
-const int SOFT_RX = 12;
-const int SOFT_TX = 14;
+const int SOFT_RX = 13;
+const int SOFT_TX = 12;
 
 
 // Addresses
