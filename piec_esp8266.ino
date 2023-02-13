@@ -177,8 +177,16 @@ void handle_wifi_init() {
             if (WiFi.status() != WL_CONNECTED) {
                 wifi_led_state ^= 1;
                 digitalWrite(P_STATUS_LED, wifi_led_state);
+
                 if (wifi_tries % 10 == 0) {
-                    Serial.printf("Connecting to %s, try %d\n", WiFi.SSID(), wifi_tries);
+                    Serial.printf("Connecting to %s, try %d, status: %s\n",
+                        WiFi.SSID(),
+                        wifi_tries,
+                        mrjake::wifi_sta_status_to_string(WiFi.status()).c_str());
+                }
+
+                if (WiFi.status() != WL_DISCONNECTED) {
+                    WiFi.begin();
                 }
 
                 wifi_tries++;

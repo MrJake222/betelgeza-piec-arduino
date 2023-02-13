@@ -7,6 +7,8 @@
 
 namespace mrjake {
 
+String wifi_sta_status_to_string(int status);
+
 class Server {
 
     static const size_t _BUF_SIZE = 1024;
