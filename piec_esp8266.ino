@@ -8,12 +8,14 @@
 #include "helpers.hpp"
 #include "server.hpp"
 #include "proto_decoder.hpp"
+#include "logger.hpp"
 
 #include "config.h"
 
 #define NTP_SERVER "pl.pool.ntp.org"           
 #define TZ "CET-1CEST,M3.5.0,M10.5.0/3" 
 
+mrjake::Logger logger(Serial);
 SoftwareSerial softSerial;
 
 void serial_init() {
@@ -96,6 +98,7 @@ void setup() {
     soft_serial_init();
 
     fs_init();
+    logger.begin("/logfile");
 
     // Status led - low turns on
     pinMode(P_STATUS_LED, OUTPUT);
@@ -169,7 +172,7 @@ void handle_wifi_init() {
             // go to STA mode
             WiFi.softAPdisconnect(true);
             WiFi.begin();
-            Serial.println("Enabling STA mode with saved config");
+            logger.println("Enabling STA mode with saved config");
             wifi_tries = 0;
         }
 
@@ -179,7 +182,7 @@ void handle_wifi_init() {
                 digitalWrite(P_STATUS_LED, wifi_led_state);
 
                 if (wifi_tries % 10 == 0) {
-                    Serial.printf("Connecting to %s, try %d, status: %s\n",
+                    logger.printf("Connecting to %s, try %d, status: %s\n",
                         WiFi.SSID(),
                         wifi_tries,
                         mrjake::wifi_sta_status_to_string(WiFi.status()).c_str());
@@ -197,8 +200,8 @@ void handle_wifi_init() {
                 should_do_wifi_check = false;
                 config_changed();
                 server.restart();
-                Serial.println("Connected in STA mode");
-                Serial.println("IP: " + WiFi.localIP().toString());
+                logger.println("Connected in STA mode");
+                logger.println("IP: " + WiFi.localIP().toString());
             }
         }
 
@@ -208,7 +211,7 @@ void handle_wifi_init() {
 
         else {
             if (wifi_wait % 10 == 0) {
-                Serial.printf("Waiting for AP connection: %d/%d\n", wifi_wait, wifi_wait_max);
+                logger.printf("Waiting for AP connection: %d/%d\n", wifi_wait, wifi_wait_max);
             }
 
             digitalWrite(P_STATUS_LED, HIGH);
