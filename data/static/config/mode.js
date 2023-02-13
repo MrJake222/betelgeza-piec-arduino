@@ -58,12 +58,14 @@ async function load_mode() {
             loadings["ap"].innerHTML += "<br>IP: " + json["ap_ip"]
         }
 
-        loadings["sta"].innerHTML += "<br>" + json["sta_status_string"]
-        if (json["sta_status_string"].includes("Connected")) {
-            loadings["sta"].innerHTML += "<br>IP: " + json["sta_ip"]
-        }
-        else {
-            loadings["sta"].style.color = "red"
+        if (sta) {
+            loadings["sta"].innerHTML += "<br>" + json["sta_status_string"]
+            if (json["sta_status_string"].includes("Connected")) {
+                loadings["sta"].innerHTML += "<br>IP: " + json["sta_ip"]
+            }
+            else {
+                loadings["sta"].style.color = "red"
+            }
         }
     }
     catch (e) {
