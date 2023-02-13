@@ -5,26 +5,29 @@
 #include "helpers.hpp"
 #include "config.h"
 
+#include "logger.hpp"
+extern mrjake::Logger logger;
+
 namespace mrjake {
 
 void ProtoDecoder::_print_data(size_t bytes_read) {
-    Serial.printf("\n%d bytes read: ", bytes_read);
+    logger.printf("\n%d bytes read: ", bytes_read);
 
     for (size_t i=0; i<bytes_read; i++) {
-        Serial.printf("%02X ", _frame_buf[_bytes_in_buffer + i]);
+        logger.printf("%02X ", _frame_buf[_bytes_in_buffer + i]);
     }
 
-    Serial.println();
+    logger.println();
 }
 
 void ProtoDecoder::_print_buffer(size_t bytes) {
-    Serial.printf("%d bytes in buffer: ", bytes);
+    logger.printf("%d bytes in buffer: ", bytes);
 
     for (size_t i=0; i<bytes; i++) {
-        Serial.printf("%02X ", _frame_buf[i]);
+        logger.printf("%02X ", _frame_buf[i]);
     }
 
-    Serial.println();
+    logger.println();
 }
 
 /*
@@ -64,7 +67,7 @@ bool ProtoDecoder::_verify_frame() {
 
     if (_frame_buf[2] != _ADDR_H || _frame_buf[3] != _ADDR_L) {
         // don't change last status, silently drop
-        Serial.printf("WARN: frame destination not matching: is %02X%02X, should be %04X\n", _frame_buf[2], _frame_buf[3], _ADDR);
+        logger.printf("WARN: frame destination not matching: is %02X%02X, should be %04X\n", _frame_buf[2], _frame_buf[3], _ADDR);
         return false;
     }
 
@@ -99,7 +102,7 @@ void ProtoDecoder::_send_response() {
         if (diff >= 5) {
             // 5 min difference
             _params_to_send[F_TIME_W] = new_time;
-            Serial.printf("sending time, diff: %d\n", diff);
+            logger.printf("sending time, diff: %d\n", diff);
         }
     }
 
@@ -109,7 +112,7 @@ void ProtoDecoder::_send_response() {
         if (_params[F_WDAY_r] != new_wday) {
             // one-day difference
             _params_to_send[F_WDAY_W] = new_wday;
-            Serial.printf("sending wday, was %d, is %d\n", _params[F_WDAY_r], new_wday);
+            logger.printf("sending wday, was %d, is %d\n", _params[F_WDAY_r], new_wday);
         }
     } 
 
@@ -131,7 +134,7 @@ void ProtoDecoder::_send_response() {
     _frame_buf[i++] = crc >> 8;
     _frame_buf[i++] = crc;
 
-    Serial.print("sending: ");
+    logger.print("sending: ");
     _print_buffer(i);
 
     delay(5);
@@ -176,8 +179,8 @@ void ProtoDecoder::read_nonblock() {
         // frame end detected in buffer
 
         bool ok = _verify_frame();
-        Serial.print("Received frame, status: " + _last_status);
-        Serial.printf(", bad frames: %d/%d\n", _wrong_frames, (_ok_frames + _wrong_frames));
+        logger.print("Received frame, status: " + _last_status);
+        logger.printf(", bad frames: %d/%d\n", _wrong_frames, (_ok_frames + _wrong_frames));
         if (ok) {
             _last_good_frame_received = get_date_time();
 
@@ -185,7 +188,7 @@ void ProtoDecoder::read_nonblock() {
             size_t data_end = _bytes_in_buffer - 4;
             size_t data_entries = (data_end - data_start) / 4;
 
-            Serial.printf("received %d parameters\n", data_entries);
+            logger.printf("received %d parameters\n", data_entries);
             _params_received_now.clear();
 
             for (size_t i=0; i<data_entries; i++) {
@@ -193,7 +196,7 @@ void ProtoDecoder::read_nonblock() {
                 uint16_t param = ((uint16_t)_frame_buf[param_start]) << 8 | _frame_buf[param_start+1];
                 uint16_t value = ((uint16_t)_frame_buf[param_start+2]) << 8 | _frame_buf[param_start+3];
                 
-                Serial.printf("  %X,%04X\n", param, value);
+                logger.printf("  %X,%04X\n", param, value);
                 _params[param] = value;
                 _params_received_now.insert(param);
             }
@@ -203,7 +206,7 @@ void ProtoDecoder::read_nonblock() {
         }
         else {
             // not ok
-            Serial.printf("received %d bytes: ", _bytes_in_buffer);
+            logger.printf("received %d bytes: ", _bytes_in_buffer);
             _print_buffer(_bytes_in_buffer);
             if (_frame_buf[2] == _ADDR_H && _frame_buf[3] == _ADDR_L) {
                 // to this module
@@ -212,7 +215,7 @@ void ProtoDecoder::read_nonblock() {
         }
 
         _bytes_in_buffer = 0;
-        Serial.println("");
+        logger.println("");
     }
     else if (_bytes_in_buffer >= _BUF_SIZE) {
         // buffer full, discard

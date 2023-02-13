@@ -34,6 +34,7 @@ class Server {
     void _handle_proto_get_params();
     void _handle_proto_set_params();
     void _handle_pump_set_time();
+    void _handle_log();
 
     int _last_error = -1;
     bool _should_check_status = false;

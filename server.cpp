@@ -3,6 +3,9 @@
 #include <LittleFS.h>
 #include "helpers.hpp"
 
+#include "logger.hpp"
+extern mrjake::Logger logger;
+
 namespace mrjake {
 
 /**
@@ -47,9 +50,11 @@ void Server::start() {
     
     _esp_server.on("/pump_set_time", HTTP_POST, std::bind(&mrjake::Server::_handle_pump_set_time, this));
 
+    _esp_server.on("/log", HTTP_GET, std::bind(&mrjake::Server::_handle_log, this));
+
     _esp_server.serveStatic("/", LittleFS, "/static/");
 
-    Serial.println("Server listening");
+    logger.println("Server listening");
 }
 
 void Server::stop() {
@@ -66,13 +71,13 @@ void Server::loop() {
             _led_state ^= 1;
             digitalWrite(P_STATUS_LED, _led_state);
 
-            Serial.print(".");
+            logger.print(".");
         }
 
         else {
-            Serial.println("");
-            Serial.println(wifi_sta_status_to_string(status));
-            Serial.println("IP: " + WiFi.localIP().toString());
+            logger.println("");
+            logger.println(wifi_sta_status_to_string(status));
+            logger.println("IP: " + WiFi.localIP().toString());
             _last_error = status;
 
             if (WiFi.isConnected()) {
@@ -93,7 +98,7 @@ void Server::loop() {
     if (_should_track_pump && ((millis() - _pump_start) >= _pump_time_to_run)) {
         digitalWrite(P_PUMP, LOW);
 
-        Serial.println("pump OFF");
+        logger.println("pump OFF");
         _should_track_pump = false;
     }
 }
@@ -210,13 +215,13 @@ void Server::_handle_wifi_ap_config() {
     String ap = _esp_server.arg("ap");
 
     if (ap == "on") {
-        Serial.println("turning on AP mode");
+        logger.println("turning on AP mode");
         _redirect("/status/ap_on.html");
 
         WiFi.persistent(true);
         WiFi.softAP("ESP8266");
     } else {
-        Serial.println("turning off AP mode");
+        logger.println("turning off AP mode");
         _redirect("/status/ap_off.html");
 
         WiFi.softAPdisconnect(true);
@@ -229,7 +234,7 @@ void Server::_handle_wifi_sta_config() {
     String sta = _esp_server.arg("sta");
 
     if (sta == "off") {
-        Serial.println("turning off STA mode");
+        logger.println("turning off STA mode");
         _redirect("status/sta_off.html");
         WiFi.disconnect(true);
     }
@@ -243,18 +248,18 @@ void Server::_handle_wifi_sta_config() {
         String ssid = _esp_server.arg("ssid");
         String pass = _esp_server.arg("pass");
 
-        Serial.println("turning on STA mode");
+        logger.println("turning on STA mode");
         _redirect("/status/sta_on.html");
 
-        Serial.println("Trying:");
-        Serial.println("  SSID: " + ssid);
-        Serial.println("  pass: " + pass);
+        logger.println("Trying:");
+        logger.println("  SSID: " + ssid);
+        logger.println("  pass: " + pass);
 
         WiFi.setAutoReconnect(true);
         WiFi.persistent(true);
         WiFi.begin(ssid, pass);
         
-        Serial.println("waiting for STA connection");
+        logger.println("waiting for STA connection");
 
         _should_check_status = true;
         _last_check_millis = millis();
@@ -274,10 +279,10 @@ void Server::_handle_proto_list_params() {
     _json_doc["good_frames"] = _decoder.get_ok_frames();
     _json_doc["wrong_frames"] = _decoder.get_wrong_frames();
 
-    // Serial.println("Reading parameters to web");
+    // logger.println("Reading parameters to web");
 
     for (const auto entry : _decoder) {
-        // Serial.printf("  param %04X is %04X\n", entry.first, entry.second);
+        // logger.printf("  param %04X is %04X\n", entry.first, entry.second);
         
         _json_doc[String(entry.first, 16)] = entry.second;
     }
@@ -368,9 +373,17 @@ void Server::_handle_pump_set_time() {
     _pump_time_to_run = min*60*1000;
     _should_track_pump = true;
 
-    Serial.printf("pump ON for %d minutes (%u millis)\n", min, _pump_time_to_run);
+    logger.printf("pump ON for %d minutes (%u millis)\n", min, _pump_time_to_run);
 
     _redirect("/status/pump_on.html");
+}
+
+void Server::_handle_log() {
+    logger.flush();
+    
+    File file = LittleFS.open("/logfile", "r");
+    _esp_server.streamFile(file, "text/plain");
+    file.close();
 }
 
 } // end namespace

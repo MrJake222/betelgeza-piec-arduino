@@ -20,7 +20,7 @@ SoftwareSerial softSerial;
 
 void serial_init() {
     Serial.begin(115200);
-    Serial.println();
+    logger.println();
 }
 
 void soft_serial_init() {
@@ -32,47 +32,47 @@ void soft_serial_init() {
     digitalWrite(SOFT_TX, LOW);
 
     if (!softSerial) {
-        Serial.println("softSerial init failed");
+        logger.println("softSerial init failed");
         while (1) delay(1000);
     }
 
     softSerial.setTimeout(1000);
-    Serial.println("softSerial OK");
+    logger.println("softSerial OK");
 }
 
 bool fs_init() {
     bool ok = LittleFS.begin();
     if (!ok) {
-        Serial.println("failed to setup FS");
+        logger.println("failed to setup FS");
         while (1) delay(1000);
         return false;
     }
 
-    Serial.println("FS init ok");
+    logger.println("FS init ok");
     
     fs::FSInfo i;
     LittleFS.info(i);
-    Serial.printf("Used: %d / %d bytes (free %d bytes)\n", i.usedBytes, i.totalBytes, i.totalBytes - i.usedBytes);
+    logger.printf("Used: %d / %d bytes (free %d bytes)\n", i.usedBytes, i.totalBytes, i.totalBytes - i.usedBytes);
     
-    Serial.println("files present:");
+    logger.println("files present:");
     listAllFilesInDir("/");
-    Serial.println("");
+    logger.println("");
 
     return true;
 }
 
 bool wifi_ap_init() {
-    Serial.println("setting up AP");
+    logger.println("setting up AP");
     
     bool ok = WiFi.softAP("ESP8266");
     if (!ok) {
-        Serial.println("failed to setup AP");
+        logger.println("failed to setup AP");
         while (1) delay(1000);
         return false;
     }
 
-    Serial.print("AP IP address: ");
-    Serial.println(WiFi.softAPIP());
+    logger.print("AP IP address: ");
+    logger.println(WiFi.softAPIP());
 
     return true;
 }
@@ -115,9 +115,9 @@ void setup() {
     WiFi.begin();
 
     for (int i=0; i<20 && !WiFi.isConnected(); i++) {
-        Serial.print("Connection attempt ");
-        Serial.print(i+1);
-        Serial.println("/20");
+        logger.print("Connection attempt ");
+        logger.print(i+1);
+        logger.println("/20");
         delay(900);
         digitalWrite(P_STATUS_LED, LOW);
         delay(100);
@@ -125,17 +125,17 @@ void setup() {
     }
 
     if (WiFi.isConnected()) {
-        Serial.println("Connected to " + WiFi.SSID());
-        Serial.println("IP: " + WiFi.localIP().toString());
+        logger.println("Connected to " + WiFi.SSID());
+        logger.println("IP: " + WiFi.localIP().toString());
 
     } else {
-        Serial.println("Can't connect, enabling AP mode");
+        logger.println("Can't connect, enabling AP mode");
         digitalWrite(P_STATUS_LED, LOW);
         wifi_ap_init();
     }
     */
 
-    Serial.println("Enabling default AP mode");
+    logger.println("Enabling default AP mode");
     digitalWrite(P_STATUS_LED, LOW);
     wifi_ap_init();
 

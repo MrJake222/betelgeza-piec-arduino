@@ -1,5 +1,8 @@
 #include "helpers.hpp"
 
+#include "logger.hpp"
+extern mrjake::Logger logger;
+
 void listAllFilesInDir(String dir_path, int level) {
 	Dir dir = LittleFS.openDir(dir_path);
 
@@ -8,7 +11,7 @@ void listAllFilesInDir(String dir_path, int level) {
 		if (dir.isFile()) {
 			// print files
             for (int i=0; i<level; i++) {
-                Serial.print("  ");
+                logger.print("  ");
             }
 
 			Serial.println("f " + dir_path + dir.fileName());
