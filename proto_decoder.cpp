@@ -11,23 +11,23 @@ extern mrjake::Logger logger;
 namespace mrjake {
 
 void ProtoDecoder::_print_data(size_t bytes_read) {
-    logger.printf("\n%d bytes read: ", bytes_read);
+    Serial.printf("\n%d bytes read: ", bytes_read);
 
     for (size_t i=0; i<bytes_read; i++) {
-        logger.printf("%02X ", _frame_buf[_bytes_in_buffer + i]);
+        Serial.printf("%02X ", _frame_buf[_bytes_in_buffer + i]);
     }
 
-    logger.println();
+    Serial.println();
 }
 
 void ProtoDecoder::_print_buffer(size_t bytes) {
-    logger.printf("%d bytes in buffer: ", bytes);
+    Serial.printf("%d bytes in buffer: ", bytes);
 
     for (size_t i=0; i<bytes; i++) {
-        logger.printf("%02X ", _frame_buf[i]);
+        Serial.printf("%02X ", _frame_buf[i]);
     }
 
-    logger.println();
+    Serial.println();
 }
 
 /*
@@ -67,7 +67,7 @@ bool ProtoDecoder::_verify_frame() {
 
     if (_frame_buf[2] != _ADDR_H || _frame_buf[3] != _ADDR_L) {
         // don't change last status, silently drop
-        logger.printf("WARN: frame destination not matching: is %02X%02X, should be %04X\n", _frame_buf[2], _frame_buf[3], _ADDR);
+        Serial.printf("WARN: frame destination not matching: is %02X%02X, should be %04X\n", _frame_buf[2], _frame_buf[3], _ADDR);
         return false;
     }
 
@@ -134,7 +134,7 @@ void ProtoDecoder::_send_response() {
     _frame_buf[i++] = crc >> 8;
     _frame_buf[i++] = crc;
 
-    logger.print("sending: ");
+    Serial.print("sending: ");
     _print_buffer(i);
 
     delay(5);
@@ -196,7 +196,7 @@ void ProtoDecoder::read_nonblock() {
                 uint16_t param = ((uint16_t)_frame_buf[param_start]) << 8 | _frame_buf[param_start+1];
                 uint16_t value = ((uint16_t)_frame_buf[param_start+2]) << 8 | _frame_buf[param_start+3];
                 
-                logger.printf("  %X,%04X\n", param, value);
+                // Serial.printf("  %X,%04X\n", param, value);
                 _params[param] = value;
                 _params_received_now.insert(param);
             }
@@ -206,8 +206,8 @@ void ProtoDecoder::read_nonblock() {
         }
         else {
             // not ok
-            logger.printf("received %d bytes: ", _bytes_in_buffer);
-            _print_buffer(_bytes_in_buffer);
+            // Serial.printf("received %d bytes: ", _bytes_in_buffer);
+            // _print_buffer(_bytes_in_buffer);
             if (_frame_buf[2] == _ADDR_H && _frame_buf[3] == _ADDR_L) {
                 // to this module
                 _wrong_frames++;
@@ -215,7 +215,7 @@ void ProtoDecoder::read_nonblock() {
         }
 
         _bytes_in_buffer = 0;
-        logger.println("");
+        // Serial.println("");
     }
     else if (_bytes_in_buffer >= _BUF_SIZE) {
         // buffer full, discard

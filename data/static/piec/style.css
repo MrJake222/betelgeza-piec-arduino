@@ -12,6 +12,10 @@
     margin-top: 0;
 }
 
+.links>* {
+    margin: 4px 0;
+}
+
 @media only screen and (max-width: 672px) {
     .statuses {
         flex-direction: column;
