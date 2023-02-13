@@ -76,6 +76,7 @@ bool wifi_ap_init() {
 }
 
 FtpServer ftpSrv;
+bool should_do_wifi_check = true;
 
 void ftp_srv_init() {
     ftpSrv.begin("norbert", "marcel!!");
@@ -84,6 +85,7 @@ void ftp_srv_init() {
 void config_changed() {
     ftpSrv.end();
     ftp_srv_init();
+    should_do_wifi_check = false;
 }
 
 mrjake::ProtoDecoder decoder(softSerial);
@@ -94,7 +96,6 @@ void setup() {
     soft_serial_init();
 
     fs_init();
-    ftp_srv_init();
 
     // Status led - low turns on
     pinMode(P_STATUS_LED, OUTPUT);
@@ -107,6 +108,7 @@ void setup() {
     // Input (inverted)
     pinMode(P_IN, INPUT);
 
+    /*
     WiFi.begin();
 
     for (int i=0; i<20 && !WiFi.isConnected(); i++) {
@@ -128,10 +130,87 @@ void setup() {
         digitalWrite(P_STATUS_LED, LOW);
         wifi_ap_init();
     }
+    */
+
+    Serial.println("Enabling default AP mode");
+    digitalWrite(P_STATUS_LED, LOW);
+    wifi_ap_init();
 
     configTime(TZ, NTP_SERVER);
 
+    ftp_srv_init();
     server.start();
+}
+
+long last_wifi_check = 0;
+int wifi_wait = 0;
+int wifi_tries = 0;
+char wifi_led_state = 0;
+const int wifi_wait_max = 60;
+
+/**
+ * This function realizes simple process to connect in STAtion mode.
+ * This loops indefinetly if no connection is being made to configured AP.
+ * Allows <wifi_wait_max> window for softAP for config changes (led flashes slightly).
+ * If station connects it stops the countdown till no station is connected (no flash).
+ * If jump is made to STA mode, it flashes while trying to connect, then turns black
+ * Pseudocode:
+ *   every 1s:
+ *     if wait = 60: STA mode
+ *     if AP.connected > 0
+ *       wait = 0
+ *     else
+ *       wait++
+ */
+void handle_wifi_init() {
+    if (should_do_wifi_check && (millis() - last_wifi_check > 1000)) {
+
+        if (wifi_wait == wifi_wait_max) {
+            // go to STA mode
+            WiFi.softAPdisconnect(true);
+            WiFi.begin();
+            Serial.println("Enabling STA mode with saved config");
+            wifi_tries = 0;
+        }
+
+        else if (wifi_wait > wifi_wait_max) {
+            if (WiFi.status() != WL_CONNECTED) {
+                wifi_led_state ^= 1;
+                digitalWrite(P_STATUS_LED, wifi_led_state);
+                if (wifi_tries % 10 == 0) {
+                    Serial.printf("Connecting to %s, try %d\n", WiFi.SSID(), wifi_tries);
+                }
+
+                wifi_tries++;
+            }
+
+            else {
+                digitalWrite(P_STATUS_LED, HIGH);
+                should_do_wifi_check = false;
+                config_changed();
+                server.restart();
+                Serial.println("Connected in STA mode");
+                Serial.println("IP: " + WiFi.localIP().toString());
+            }
+        }
+
+        else if (wifi_softap_get_station_num() > 0) {
+            wifi_wait = 0;
+        }
+
+        else {
+            if (wifi_wait % 10 == 0) {
+                Serial.printf("Waiting for AP connection: %d/%d\n", wifi_wait, wifi_wait_max);
+            }
+
+            digitalWrite(P_STATUS_LED, HIGH);
+            delay(20);
+            digitalWrite(P_STATUS_LED, LOW);
+        }
+        
+        wifi_wait++;
+        last_wifi_check = millis();
+    }
 }
 
 long last_print = 0;
@@ -145,7 +224,9 @@ void loop() {
     ftpSrv.handleFTP();
     
     decoder.read_nonblock();
+    handle_wifi_init();
 
+    /* measure max loop time */
     long stop = millis();
     if ((stop - start) > maxm) {
         maxm = stop - start;
