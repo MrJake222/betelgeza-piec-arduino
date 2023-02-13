@@ -380,7 +380,7 @@ void Server::_handle_pump_set_time() {
 
 void Server::_handle_log() {
     logger.flush();
-    
+
     File file = LittleFS.open("/logfile", "r");
     _esp_server.streamFile(file, "text/plain");
     file.close();

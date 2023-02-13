@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ESP8266WebServer.h>
+#include <ESP8266HTTPUpdateServer.h>
 #include "lib/ArduinoJson.h"
 
 #include "proto_decoder.hpp"
@@ -15,6 +16,7 @@ class Server {
 
     short _port;
     ESP8266WebServer _esp_server;
+    ESP8266HTTPUpdateServer _esp_update_server;
 
     // buffer for serialization of JSON
     char _buf[_BUF_SIZE];
@@ -53,7 +55,9 @@ public:
         _json_doc(1024),
         _esp_server(port),
         _decoder(decoder),
-        _config_changed_callback(config_changed_callback) { }
+        _config_changed_callback(config_changed_callback) {
+            _esp_update_server.setup(&_esp_server);
+        }
 
     short get_port() { return _port; }
 

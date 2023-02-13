@@ -244,7 +244,7 @@ void loop() {
     }
 
     if (millis() - last_print > 10000) {
-        Serial.printf("  max loop time: %d ms\n", maxm);
+        Serial.printf("  max loop time (of 10s): %d ms\n", maxm);
         maxm = 0;
         last_print = millis();
     }
