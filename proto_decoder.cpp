@@ -94,27 +94,38 @@ void ProtoDecoder::_send_response() {
     // _params_to_send[0x01F6] = 50; // co = 50
     // _params_to_send[0x028E] = 51; // cwu = 51
     // _params_to_send[0x0245] = 2; // pompy = 0
+    uint16_t new_time = tech_get_time();
 
-    if (_params_received_now.count(F_TIME_r)) {
-        uint16_t new_time = tech_get_time();
-
-        int diff = tech_time_diff(_params[F_TIME_r], new_time);
-        if (diff >= 5) {
-            // 5 min difference
-            _params_to_send[F_TIME_W] = new_time;
-            logger.printf("sending time, diff: %d\n", diff);
+    // send time updates if clock set (not default 1 Jan 1970)
+    if (get_year() > 1970) {
+        if (_params_received_now.count(F_TIME_r)) {
+            int diff = tech_time_diff(_params[F_TIME_r], new_time);
+            if (diff >= 5) {
+                // 5 min difference
+                _params_to_send[F_TIME_W] = new_time;
+                logger.printf("sending time, was: %s(hex %x), is: %s(hex %x), diff: %d\n",
+                    tech_time_to_string(_params[F_TIME_r]).c_str(),
+                    _params[F_TIME_r],
+                    tech_time_to_string(new_time).c_str(),
+                    new_time,
+                    diff
+                );
+            }
         }
+
+        if (_params_received_now.count(F_WDAY_r)) {
+            uint16_t new_wday = get_wday();
+
+            /*
+            * update before 23:55 and after 0:05
+            */
+            if (_params[F_WDAY_r] != new_wday && tech_time_diff(new_time, 0) >= 5) {
+                // one-day difference
+                _params_to_send[F_WDAY_W] = new_wday;
+                logger.printf("sending wday, was %d, is %d\n", _params[F_WDAY_r], new_wday);
+            }
+        } 
     }
-
-    if (_params_received_now.count(F_WDAY_r)) {
-        uint16_t new_wday = get_wday();
-
-        if (_params[F_WDAY_r] != new_wday) {
-            // one-day difference
-            _params_to_send[F_WDAY_W] = new_wday;
-            logger.printf("sending wday, was %d, is %d\n", _params[F_WDAY_r], new_wday);
-        }
-    } 
 
     // start is good, address is good
     size_t i = 4;
@@ -179,8 +190,8 @@ void ProtoDecoder::read_nonblock() {
         // frame end detected in buffer
 
         bool ok = _verify_frame();
-        logger.print("Received frame, status: " + _last_status);
-        logger.printf(", bad frames: %d/%d\n", _wrong_frames, (_ok_frames + _wrong_frames));
+        Serial.print("Received frame, status: " + _last_status);
+        Serial.printf(", bad frames: %d/%d\n", _wrong_frames, (_ok_frames + _wrong_frames));
         if (ok) {
             _last_good_frame_received = get_date_time();
 
@@ -188,7 +199,7 @@ void ProtoDecoder::read_nonblock() {
             size_t data_end = _bytes_in_buffer - 4;
             size_t data_entries = (data_end - data_start) / 4;
 
-            logger.printf("received %d parameters\n", data_entries);
+            Serial.printf("received %d parameters\n", data_entries);
             _params_received_now.clear();
 
             for (size_t i=0; i<data_entries; i++) {

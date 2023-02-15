@@ -11,7 +11,7 @@ void listAllFilesInDir(String dir_path, int level) {
 		if (dir.isFile()) {
 			// print files
             for (int i=0; i<level; i++) {
-                logger.print("  ");
+                Serial.print("  ");
             }
 
 			Serial.println("f " + dir_path + dir.fileName());
@@ -53,6 +53,15 @@ uint16_t get_wday() {
     return tm.tm_wday;
 }
 
+uint16_t get_year() {
+    time_t now;
+    tm tm;
+    time(&now);
+    localtime_r(&now, &tm);
+
+    return tm.tm_year;
+}
+
 uint16_t tech_get_time() {
     time_t now;
     tm tm;
@@ -68,9 +77,19 @@ String tech_time_to_string(uint16_t time) {
     return String(buf);
 }
 
-// TODO test this
+int tech_time_to_minutes(int time) {
+    return (time >> 8) * 60 + (time & 0xFF);
+}
+
 int tech_time_diff(int time, int time2) {
-    int diff = abs((time >> 8) - (time2 >> 8)) * 60;
-    diff += abs((time & 0xFF) - (time2 & 0xFF));
+    int min1 = tech_time_to_minutes(time);
+    int min2 = tech_time_to_minutes(time2);
+
+    int diff = abs(min1 - min2);
+    int diff2 = abs(24*60 - diff);
+    
+    if (diff2 < diff)
+        return diff2;
+    
     return diff;
 }
