@@ -59,7 +59,7 @@ uint16_t get_year() {
     time(&now);
     localtime_r(&now, &tm);
 
-    return tm.tm_year;
+    return 1900 + tm.tm_year;
 }
 
 uint16_t tech_get_time() {
