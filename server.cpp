@@ -348,17 +348,36 @@ void Server::_handle_proto_get_params() {
 }
 
 void Server::_handle_proto_set_params() {
-    if (_esp_server.hasArg("co_target"))
-        _decoder.schedule_for_send(F_CO_TARGET_W, _esp_server.arg("co_target").toInt());
 
-    if (_esp_server.hasArg("cwu_target"))
-        _decoder.schedule_for_send(F_CWU_TARGET_W, _esp_server.arg("cwu_target").toInt());
+    logger.printf("set parameters from %s\n", get_client_ip().c_str());
 
-    if (_esp_server.hasArg("pumps_mode"))
-        _decoder.schedule_for_send(F_PUMPS_MODE_W, _esp_server.arg("pumps_mode").toInt());
+    if (_esp_server.hasArg("co_target")) {
+        int val = _esp_server.arg("co_target").toInt();
 
-    if (_esp_server.hasArg("valve_target"))
-        _decoder.schedule_for_send(F_VALVE_TARGET_W, _esp_server.arg("valve_target").toInt());
+        logger.printf("setting co_target to %d\n", val);
+        _decoder.schedule_for_send(F_CO_TARGET_W, val);
+    }
+
+    if (_esp_server.hasArg("cwu_target")) {
+        int val = _esp_server.arg("cwu_target").toInt();
+
+        logger.printf("setting cwu_target to %d\n", val);
+        _decoder.schedule_for_send(F_CWU_TARGET_W, val);
+    }
+
+    if (_esp_server.hasArg("pumps_mode")) {
+        int val = _esp_server.arg("pumps_mode").toInt();
+
+        logger.printf("setting pumps_mode to %d\n", val);
+        _decoder.schedule_for_send(F_PUMPS_MODE_W, val);
+    }
+
+    if (_esp_server.hasArg("valve_target")) {
+        int val = _esp_server.arg("valve_target").toInt();
+
+        logger.printf("setting valve_target to %d\n", val);
+        _decoder.schedule_for_send(F_VALVE_TARGET_W, val);
+    }
 
     _redirect("/status/param_set.html");
 }
@@ -373,7 +392,7 @@ void Server::_handle_pump_set_time() {
     _pump_time_to_run = min*60*1000;
     _should_track_pump = true;
 
-    logger.printf("pump ON for %d minutes (%u millis)\n", min, _pump_time_to_run);
+    logger.printf("pump ON from %s for %d minutes (%u millis)\n", get_client_ip().c_str(), min, _pump_time_to_run);
 
     _redirect("/status/pump_on.html");
 }

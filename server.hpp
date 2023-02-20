@@ -18,6 +18,9 @@ class Server {
     ESP8266WebServer _esp_server;
     ESP8266HTTPUpdateServer _esp_update_server;
 
+    // server functions
+    String get_client_ip() { return _esp_server.client().remoteIP().toString(); }
+
     // buffer for serialization of JSON
     char _buf[_BUF_SIZE];
     DynamicJsonDocument _json_doc;
