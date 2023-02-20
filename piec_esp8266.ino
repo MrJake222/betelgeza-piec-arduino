@@ -9,6 +9,7 @@
 #include "server.hpp"
 #include "proto_decoder.hpp"
 #include "logger.hpp"
+#include "wifi_events.hpp"
 
 #include "config.h"
 
@@ -135,6 +136,9 @@ void setup() {
     }
     */
 
+    logger.println("Registering WiFi events");
+    wifi_register_events();
+
     logger.println("Enabling default AP mode");
     digitalWrite(P_STATUS_LED, LOW);
     wifi_ap_init();
@@ -200,8 +204,8 @@ void handle_wifi_init() {
                 should_do_wifi_check = false;
                 config_changed();
                 server.restart();
-                logger.println("Connected in STA mode");
-                logger.println("IP: " + WiFi.localIP().toString());
+                // logger.println("Connected in STA mode");
+                // logger.println("IP: " + WiFi.localIP().toString());
             }
         }
 

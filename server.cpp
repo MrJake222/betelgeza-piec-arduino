@@ -71,13 +71,13 @@ void Server::loop() {
             _led_state ^= 1;
             digitalWrite(P_STATUS_LED, _led_state);
 
-            logger.print(".");
+            //logger.print(".");
         }
 
         else {
-            logger.println("");
-            logger.println(wifi_sta_status_to_string(status));
-            logger.println("IP: " + WiFi.localIP().toString());
+            //logger.println("");
+            //logger.println(wifi_sta_status_to_string(status));
+            //logger.println("IP: " + WiFi.localIP().toString());
             _last_error = status;
 
             if (WiFi.isConnected()) {
