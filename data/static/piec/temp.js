@@ -22,20 +22,24 @@ function temp_update(json) {
         }
     })
 
-    const co_set = document.getElementById("co_set");
-    co_set.value = json["co_target"]
-    co_set.min = json["co_min"]
-    co_set.max = json["co_max"]
+    if (first_temp) {
+        first_temp = false
 
-    const cwu_set = document.getElementById("cwu_set");
-    cwu_set.value = json["cwu_target"]
-    cwu_set.min = json["cwu_min"]
-    cwu_set.max = json["cwu_max"]
+        const co_set = document.getElementById("co_set");
+        co_set.value = json["co_target"]
+        co_set.min = json["co_min"]
+        co_set.max = json["co_max"]
 
-    const valve_set = document.getElementById("valve_set");
-    valve_set.value = json["valve_target"] !== undefined ? json["valve_target"] : 30
-    valve_set.min = json["valve_min"] !== undefined ? json["valve_min"] : 0
-    valve_set.max = json["valve_max"] !== undefined ? json["valve_max"] : 100
+        const cwu_set = document.getElementById("cwu_set");
+        cwu_set.value = json["cwu_target"]
+        cwu_set.min = json["cwu_min"]
+        cwu_set.max = json["cwu_max"]
 
-    document.getElementById("pumps_modes").value = json["pumps_mode"]
+        const valve_set = document.getElementById("valve_set");
+        valve_set.value = json["valve_target"] !== undefined ? json["valve_target"] : 30
+        valve_set.min = json["valve_min"] !== undefined ? json["valve_min"] : 0
+        valve_set.max = json["valve_max"] !== undefined ? json["valve_max"] : 100
+
+        document.getElementById("pumps_modes").value = json["pumps_mode"]
+    }
 }

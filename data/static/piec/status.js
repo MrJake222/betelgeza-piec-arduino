@@ -7,6 +7,8 @@ function status_update(json) {
         status.innerHTML = "Brak ramek"
         status.parentNode.classList.remove("good")
         status.parentNode.classList.add("bad")
+        frame_stats.innerHTML = "Brak ramek"
+        last_good.innerHTML = "Brak ramek"
     } else {
         status.innerHTML = json["last_status"]
 
