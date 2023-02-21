@@ -1,5 +1,6 @@
 #include "proto_decoder.hpp"
 
+#include <ESP8266WiFi.h>
 #include <HardwareSerial.h>
 
 #include "helpers.hpp"
@@ -126,6 +127,49 @@ void ProtoDecoder::_send_response() {
             }
         } 
     }
+
+    // some IP experiments to show IP on the unit
+    // this displays 168.0.0.0
+    // if (_params_received_now.count(0x0372)) {
+    //     IPAddress ip = WiFi.localIP();
+    //     _params_to_send[0x0372] = ((uint16_t)ip[0]) << 8 | ip[1];
+    //     _params_to_send[0x0373] = ((uint16_t)ip[2]) << 8 | ip[3];
+    //     logger.printf("sending IP address: %s, 0x0372=%04x, 0x0373=%04x\n", ip.toString().c_str(), _params_to_send[0x0372], _params_to_send[0x0373]);
+    // }
+    // 
+    // this displays 168.0.0.0
+    // if (_params_received_now.count(0x0372) && _params_received_now.count(0x0376)) {
+    //     IPAddress ip = WiFi.localIP();
+    //     _params_to_send[0x0372] = ip[0] << 8 | ip[1];
+    //     _params_to_send[0x0376] = ip[2] << 8 | ip[3];
+    // }
+    // 
+    // this displays 192.0.0.0
+    // if (_params_received_now.count(0x0372)) {
+    //     IPAddress ip = WiFi.localIP();
+    //     logger.printf("sending IP address: %s\n", ip.toString().c_str());
+    //     for (int i=0; i<4; i++)
+    //         _params_to_send[0x0372 + i] = ip[i];
+    // }
+    // 
+    // 372 -> ip first octet (only 8-bits read)
+    // 373 -> ignored ?
+    // 374 -> ignored ?
+    // 375 -> ignored ?
+    // 
+    // mask?
+    // 376 -> ignored ?
+    // 377 -> ignored ?
+    // 378 -> ignored ?
+    // 379 -> ignored ?
+    // 
+    // 0.0.0.0
+    // if (_params_received_now.count(0x0376)) {
+    //     IPAddress mask = WiFi.subnetMask();
+    //     logger.printf("sending IP mask: %s\n", mask.toString().c_str());
+    //     for (int i=0; i<4; i++)
+    //         _params_to_send[0x0376 + i] = mask[i];
+    // }
 
     // start is good, address is good
     size_t i = 4;
