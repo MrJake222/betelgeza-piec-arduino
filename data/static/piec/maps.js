@@ -7,7 +7,12 @@ let pump_map = {
 
 let cu_map = {
     0x0000: "wygaszony",
+    0x0001: "czuwanie",     // artificial
     0x0002: "praca",
+    0x0003: "rozpalanie",   // artificial
+    0x0004: "wygaszanie",   // artificial, not yet available
+
+    // don't seem to be available
     0x0082: "nadzór",
     0x0009: "alarm: Temperatura nie rośnie",
     0x000E: "alarm: Czujnik CO uszkodzony",

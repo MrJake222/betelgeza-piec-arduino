@@ -37,6 +37,9 @@ const uint16_t F_VALVE_RANGE_r = 0x16C3;
 const uint16_t F_PUMPS_MODE_r = 0x15CD;
 // Control unit
 const uint16_t F_CU_STATE_r = 0x157C;
+const uint16_t F_CU_STANDBY_r = 0x1591;
+const uint16_t F_CU_FAN_r = 0x159B;
+const uint16_t F_CU_FEED_r = 0x1587;
 
 
 // Fields (write)
@@ -52,3 +55,9 @@ const uint16_t F_PUMPS_MODE_W = 0x0245;
 // Control unit
 const uint16_t F_TURN_ON_W = 0x0209;
 const uint16_t F_TURN_OFF_W = 0x020A;
+
+
+// Artificial states
+const uint16_t STATE_STANDBY = 1;
+const uint16_t STATE_TURNING_ON = 3;
+const uint16_t STATE_TURNING_OFF = 4; // not used currently

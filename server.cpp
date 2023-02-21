@@ -36,6 +36,39 @@ String wifi_sta_status_to_string(int status) {
     }
 }
 
+uint16_t get_cu_state(uint16_t cu_state, uint16_t cu_standby, uint16_t cu_fan, uint16_t cu_feed) {
+    if (cu_state != 0) {
+        return cu_state;
+    }
+
+    // cu_state == 0, ambiguous
+
+    if (cu_standby == 0) {
+        return 0; // original turned off state
+    }
+
+    // cu_standby == 1
+
+    if (cu_fan > 0) {
+        // can't be turned on, it's one of the default states (cu_state==2)
+        return STATE_TURNING_ON;
+    }
+
+    // cu_fan == 0
+
+    if (cu_feed == 1) {
+        // fan 0, feed working -> initial state of turning on
+        return STATE_TURNING_ON;
+    }
+
+    // cu_feed == 0
+
+    // no feed, no fan, standby
+    return STATE_STANDBY;
+
+    // TODO add turning off decision tree
+}
+
 void Server::start() {
     _esp_server.begin();
 
@@ -338,8 +371,19 @@ void Server::_handle_proto_get_params() {
 
     if (_decoder.has_param(F_PUMPS_MODE_r))
         _json_doc["pumps_mode"] = _decoder.get_param(F_PUMPS_MODE_r);
-    if (_decoder.has_param(F_CU_STATE_r))
-        _json_doc["cu_state"] = _decoder.get_param(F_CU_STATE_r);
+
+    // decision tree for cu_state
+    if (_decoder.has_param(F_CU_STATE_r)
+        && _decoder.has_param(F_CU_STANDBY_r)
+        && _decoder.has_param(F_CU_FAN_r)
+        && _decoder.has_param(F_CU_FEED_r)) {
+        
+        _json_doc["cu_state"] = get_cu_state(
+            _decoder.get_param(F_CU_STATE_r),
+            _decoder.get_param(F_CU_STANDBY_r),
+            _decoder.get_param(F_CU_FAN_r),
+            _decoder.get_param(F_CU_FEED_r));
+    }
 
     if (_should_track_pump)
         _json_doc["circulation_pump_time_left"] = (_pump_time_to_run + _pump_start - millis()) / 1000;
