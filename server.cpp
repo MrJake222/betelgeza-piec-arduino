@@ -47,6 +47,8 @@ void Server::start() {
     _esp_server.on("/proto_list_params", HTTP_GET, std::bind(&mrjake::Server::_handle_proto_list_params, this));
     _esp_server.on("/proto_get_params", HTTP_GET, std::bind(&mrjake::Server::_handle_proto_get_params, this));
     _esp_server.on("/proto_set_params", HTTP_POST, std::bind(&mrjake::Server::_handle_proto_set_params, this));
+    _esp_server.on("/proto_turn_on", HTTP_POST, std::bind(&mrjake::Server::_handle_proto_turn_on, this));
+    _esp_server.on("/proto_turn_off", HTTP_POST, std::bind(&mrjake::Server::_handle_proto_turn_off, this));
     
     _esp_server.on("/pump_set_time", HTTP_POST, std::bind(&mrjake::Server::_handle_pump_set_time, this));
 
@@ -380,6 +382,20 @@ void Server::_handle_proto_set_params() {
     }
 
     _redirect("/status/param_set.html");
+}
+
+void Server::_handle_proto_turn_on() {
+    logger.printf("turn on from %s\n", get_client_ip().c_str());
+    _decoder.schedule_for_send(F_TURN_ON_W, 1);
+    
+    _redirect("/status/turned_on.html");
+}
+
+void Server::_handle_proto_turn_off() {
+    logger.printf("turn off from %s\n", get_client_ip().c_str());
+    _decoder.schedule_for_send(F_TURN_OFF_W, 1);
+
+    _redirect("/status/turned_off.html");
 }
 
 void Server::_handle_pump_set_time() {

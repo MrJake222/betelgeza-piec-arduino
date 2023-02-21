@@ -152,10 +152,10 @@
                 <input type="number" id="cwu_set" name="cwu_target" />
             </div>
 
-            <div>
+            <!-- <div>
                 <span>Zadana temperatura zaworu:</span>
                 <input type="number" id="valve_set" name="valve_target" />
-            </div>
+            </div> -->
 
             <div>
                 <span>Tryb pracy pomp:</span>
@@ -163,6 +163,17 @@
             </div>
 
             <input type="submit" value="Potwierdź" />
+        </form>
+    </section>
+
+    <section class="section">
+        <p class="title">Rozpalanie/Wygaszanie</p>
+        <form class="on_off_form" action="/proto_turn_on" method="POST" onsubmit="return confirm('Na pewno rozpalić piec?');">
+            <input type="submit" value="Rozpal piec" />
+        </form>
+
+        <form class="on_off_form" action="/proto_turn_off" method="POST" onsubmit="return confirm('Na pewno wygasić piec?');">
+            <input type="submit" value="Wygaś piec" />
         </form>
     </section>
 </body>

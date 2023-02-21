@@ -38,6 +38,8 @@ class Server {
     void _handle_proto_list_params();
     void _handle_proto_get_params();
     void _handle_proto_set_params();
+    void _handle_proto_turn_on();
+    void _handle_proto_turn_off();
     void _handle_pump_set_time();
     void _handle_log();
 

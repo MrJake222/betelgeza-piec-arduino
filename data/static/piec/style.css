@@ -176,6 +176,15 @@
     align-self: center;
 }
 
+.on_off_form {
+    width: fit-content;
+    margin-top: 14px;
+}
+
+.on_off_form>* {
+    width: 150px;
+}
+
 #pump_form {
     margin: 0 20px;
     display: flex;

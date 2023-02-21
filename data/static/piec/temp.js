@@ -35,10 +35,10 @@ function temp_update(json) {
         cwu_set.min = json["cwu_min"]
         cwu_set.max = json["cwu_max"]
 
-        const valve_set = document.getElementById("valve_set");
-        valve_set.value = json["valve_target"] !== undefined ? json["valve_target"] : 30
-        valve_set.min = json["valve_min"] !== undefined ? json["valve_min"] : 0
-        valve_set.max = json["valve_max"] !== undefined ? json["valve_max"] : 100
+        // const valve_set = document.getElementById("valve_set");
+        // valve_set.value = json["valve_target"] !== undefined ? json["valve_target"] : 30
+        // valve_set.min = json["valve_min"] !== undefined ? json["valve_min"] : 0
+        // valve_set.max = json["valve_max"] !== undefined ? json["valve_max"] : 100
 
         document.getElementById("pumps_modes").value = json["pumps_mode"]
     }

@@ -46,6 +46,9 @@ const uint16_t F_WDAY_W = 0x299;
 // Temps
 const uint16_t F_CO_TARGET_W = 0x01F6;
 const uint16_t F_CWU_TARGET_W = 0x028E;
-const uint16_t F_VALVE_TARGET_W = 0x02f7;
+const uint16_t F_VALVE_TARGET_W = 0x02f7; // doesn't work
 // Pump
 const uint16_t F_PUMPS_MODE_W = 0x0245;
+// Control unit
+const uint16_t F_TURN_ON_W = 0x0209;
+const uint16_t F_TURN_OFF_W = 0x020A;
