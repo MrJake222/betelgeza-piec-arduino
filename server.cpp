@@ -36,7 +36,7 @@ String wifi_sta_status_to_string(int status) {
     }
 }
 
-uint16_t get_cu_state(uint16_t cu_state, uint16_t cu_standby, uint16_t cu_fan, uint16_t cu_feed) {
+uint16_t get_cu_state(uint16_t cu_state, uint16_t cu_standby, uint16_t cu_fan, uint16_t cu_feed, uint16_t co_current, uint16_t co_target) {
     if (cu_state != 0) {
         return cu_state;
     }
@@ -51,6 +51,14 @@ uint16_t get_cu_state(uint16_t cu_state, uint16_t cu_standby, uint16_t cu_fan, u
 
     if (cu_fan > 0) {
         // can't be turned on, it's one of the default states (cu_state==2)
+        // here also can be turning off (large fan speed)
+
+        if (co_current > co_target) {
+            // if large temperature
+            return STATE_TURNING_OFF;
+        }
+        
+        // smaller or equal temperature
         return STATE_TURNING_ON;
     }
 
@@ -376,13 +384,17 @@ void Server::_handle_proto_get_params() {
     if (_decoder.has_param(F_CU_STATE_r)
         && _decoder.has_param(F_CU_STANDBY_r)
         && _decoder.has_param(F_CU_FAN_r)
-        && _decoder.has_param(F_CU_FEED_r)) {
+        && _decoder.has_param(F_CU_FEED_r)
+        && _decoder.has_param(F_CO_CURRENT_r)
+        && _decoder.has_param(F_CO_TARGET_r)) {
         
         _json_doc["cu_state"] = get_cu_state(
             _decoder.get_param(F_CU_STATE_r),
             _decoder.get_param(F_CU_STANDBY_r),
             _decoder.get_param(F_CU_FAN_r),
-            _decoder.get_param(F_CU_FEED_r));
+            _decoder.get_param(F_CU_FEED_r),
+            _decoder.get_param(F_CO_CURRENT_r),
+            _decoder.get_param(F_CO_TARGET_r));
     }
 
     if (_should_track_pump)
