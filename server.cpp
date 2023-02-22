@@ -393,7 +393,7 @@ void Server::_handle_proto_get_params() {
             _decoder.get_param(F_CU_STANDBY_r),
             _decoder.get_param(F_CU_FAN_r),
             _decoder.get_param(F_CU_FEED_r),
-            _decoder.get_param(F_CO_CURRENT_r),
+            _decoder.get_param(F_CO_CURRENT_r) / 10,
             _decoder.get_param(F_CO_TARGET_r));
     }
 
